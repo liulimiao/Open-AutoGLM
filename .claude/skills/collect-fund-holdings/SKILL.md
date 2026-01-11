@@ -94,7 +94,7 @@ print(f'收集结果: {result}')
 
 1. ✅ 手机已通过ADB连接并调试
 2. ✅ 投资账本app已打开到**单个账本的持仓列表页**（不是基金tab）
-3. ✅ .env文件中已设置ZHIPU_API_KEY
+3. ✅ .env文件中已设置ZHIPU_API_KEY（可用 `grep ZHIPU_API_KEY .env` 检查）
 4. ✅ 项目根目录存在.venv虚拟环境目录
 
 ## 数据提取与去重
