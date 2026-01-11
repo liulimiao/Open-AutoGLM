@@ -7,7 +7,6 @@
 - [ ] ADB已安装
 - [ ] Android设备已连接并授权
 - [ ] ADB Keyboard已安装并启用
-- [ ] ModelScope API Key已获取
 
 ## 2. 环境验证脚本
 
@@ -27,15 +26,6 @@
 ```
 
 ## 3. 运行AutoGLM
-
-### 使用ModelScope服务运行
-```bash
-python main.py \
-  --base-url https://api-inference.modelscope.cn/v1 \
-  --model "ZhipuAI/AutoGLM-Phone-9B" \
-  --apikey "your-modelscope-api-key" \
-  "打开美团搜索附近的火锅店"
-```
 
 ### 使用智谱 BigModel 服务运行
 ```bash
@@ -64,43 +54,29 @@ python main.py \
 3. AutoGLM会自动切换输入法，无需手动设置为默认
 
 ### 模型服务问题
-1. 确保ModelScope API Key正确
+1. 确保智谱 API Key正确
 2. 检查网络连接
-3. 确认ModelScope账户有足够额度
+3. 确认智谱账户有足够额度
 
 ## 5. 示例任务
 
 ```bash
-# 基础应用启动 (ModelScope)
-python main.py \
-  --base-url https://api-inference.modelscope.cn/v1 \
-  --model "ZhipuAI/AutoGLM-Phone-9B" \
-  --apikey "your-modelscope-api-key" \
-  "打开微信"
-
-# 带操作的任务 (ModelScope)
-python main.py \
-  --base-url https://api-inference.modelscope.cn/v1 \
-  --model "ZhipuAI/AutoGLM-Phone-9B" \
-  --apikey "your-modelscope-api-key" \
-  "打开淘宝搜索iPhone 15"
-
-# 复杂任务 (ModelScope)
-python main.py \
-  --base-url https://api-inference.modelscope.cn/v1 \
-  --model "ZhipuAI/AutoGLM-Phone-9B" \
-  --apikey "your-modelscope-api-key" \
-  "打开美团搜索附近的火锅店，并选择评分最高的"
-
-# 多步骤任务 (ModelScope)
-python main.py \
-  --base-url https://api-inference.modelscope.cn/v1 \
-  --model "ZhipuAI/AutoGLM-Phone-9B" \
-  --apikey "your-modelscope-api-key" \
-  "打开微博，发布一条带图片的状态"
-
 # 使用智谱 BigModel
 ./run_zhipu.sh your-zhipu-api-key "打开微信"
+
+# 使用命令行
+python main.py \
+  --base-url https://open.bigmodel.cn/api/paas/v4 \
+  --model "autoglm-phone" \
+  --apikey "your-zhipu-api-key" \
+  "打开微信"
+
+# 复杂任务
+python main.py \
+  --base-url https://open.bigmodel.cn/api/paas/v4 \
+  --model "autoglm-phone" \
+  --apikey "your-zhipu-api-key" \
+  "打开美团搜索附近的火锅店，并选择评分最高的"
 ```
 
 ## 6. 高级配置
@@ -108,11 +84,6 @@ python main.py \
 ### 配置文件 (.env)
 编辑`.env`文件来保存常用配置：
 ```
-# ModelScope 配置
-MODELSCOPE_API_KEY=your-actual-api-key
-BASE_URL=https://api-inference.modelscope.cn/v1
-MODEL_NAME=ZhipuAI/AutoGLM-Phone-9B
-
 # 智谱 BigModel 配置
 ZHIPU_API_KEY=your-zhipu-api-key
 ZHIPU_BASE_URL=https://open.bigmodel.cn/api/paas/v4
@@ -160,9 +131,9 @@ pytest tests/
 ### 启用Verbose模式查看详细过程
 ```bash
 python main.py --verbose \
-  --base-url https://api-inference.modelscope.cn/v1 \
-  --model "ZhipuAI/AutoGLM-Phone-9B" \
-  --apikey "your-modelscope-api-key" \
+  --base-url https://open.bigmodel.cn/api/paas/v4 \
+  --model "autoglm-phone" \
+  --apikey "your-zhipu-api-key" \
   "打开微信"
 ```
 
@@ -174,13 +145,6 @@ AutoGLM也支持通过WiFi进行远程调试：
 2. 使用`adb connect IP:PORT`连接设备
 3. 指定设备ID运行：
    ```bash
-   # 使用 ModelScope
-   python main.py --device-id IP:PORT \
-     --base-url https://api-inference.modelscope.cn/v1 \
-     --model "ZhipuAI/AutoGLM-Phone-9B" \
-     --apikey "your-modelscope-api-key" \
-     "打开抖音刷视频"
-   
    # 使用智谱 BigModel
    python main.py --device-id IP:PORT \
      --base-url https://open.bigmodel.cn/api/paas/v4 \
