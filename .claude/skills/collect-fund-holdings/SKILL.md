@@ -32,7 +32,16 @@
 ```
 
 ### 3. 数据来源
-AI分析屏幕内容时，关键信息会出现在**"思考过程:"**部分，包含：
+AI分析屏幕内容时，关键信息会出现在结构化的JSON输出中：
+```json
+{
+  "step": 1,
+  "thinking": "AI看到的屏幕内容的文字描述...",
+  "action": {...}
+}
+```
+
+`thinking`字段包含：
 - AI看到的屏幕内容的文字描述
 - 识别出的基金名称、代码、数值等
 - 每个字段的含义和数值
@@ -57,7 +66,7 @@ agent._context.append({
 ```bash
 .venv/bin/python -c "
 import os
-from phone_agent import PhoneAgent
+from phone_agent.agent_for_coding_agent import PhoneAgent
 from phone_agent.agent import AgentConfig
 from phone_agent.model import ModelConfig
 
@@ -69,7 +78,7 @@ model_config = ModelConfig(
     base_url='https://open.bigmodel.cn/api/paas/v4',
     api_key=os.environ['ZHIPU_API_KEY'],
     model_name='autoglm-phone',
-    temperature=0.1,  # 低温度确保数据准确性
+    temperature=0.1,
 )
 
 agent_config = AgentConfig(max_steps=15, verbose=True, lang='cn')
@@ -90,18 +99,32 @@ print(f'收集结果: {result}')
 
 ## 数据提取与去重
 
-### 从"思考过程:"提取数据
+### 从JSON输出提取数据
 AI的输出结构：
+```json
+{
+  "step": 1,
+  "thinking": "我看到以下基金信息：\n1. 广发创业板ETF联接A (003765)\n   - 市值：18,930.42\n   - 仓位：8.97%\n   - 持有盈亏：+6,903.44\n...",
+  "action": {
+    "_metadata": "do",
+    "action": "Tap",
+    "element": [499, 544]
+  }
+}
 ```
-==================================================
-💭 思考过程:
---------------------------------------------------
-[这里包含屏幕内容的文字描述]
-1. 广发创业板ETF联接A (003765)
-   - 市值：18,930.42
-   - 仓位：8.97%
-   - 持有盈亏：+6,903.44
-...
+
+当任务完成时：
+```json
+{
+  "step": 5,
+  "thinking": "我已经完整查看了所有基金信息...",
+  "action": {
+    "_metadata": "finish",
+    "message": "任务完成，共12只基金..."
+  },
+  "finished": true,
+  "message": "任务完成，共12只基金..."
+}
 ```
 
 ### 去重实现示例
@@ -163,7 +186,7 @@ for fund in all_funds:
 A: 屏幕滚动时内容重叠是正常的，按基金代码去重即可。
 
 ### Q: 如何判断已经收集完所有数据？
-A: AI的输出中会包含完整的基金列表，通常在最后会说明"我已经完整查看了所有基金信息"。
+A: 当输出中包含`"finished": true`时，表示任务完成。
 
 ### Q: 数据不完整怎么办？
 A: 重新执行一次，确保任务描述中包含"信息可能需要滚动屏幕才能看完"的提示。
