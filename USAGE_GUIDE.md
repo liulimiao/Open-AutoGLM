@@ -12,17 +12,17 @@
 
 ### 检查ADB连接状态
 ```bash
-./check_adb_connection.sh
+./scripts/check_adb_connection.sh
 ```
 
 ### 重启ADB服务
 ```bash
-./restart_adb.sh
+./scripts/restart_adb.sh
 ```
 
 ### 安装ADB Keyboard
 ```bash
-./install_adb_keyboard.sh
+./scripts/install_adb_keyboard.sh
 ```
 
 ## 3. 运行AutoGLM
@@ -46,7 +46,7 @@ python main.py \
 1. 确保手机已启用开发者选项和USB调试
 2. 确保在手机上授权了调试请求
 3. 尝试更换USB线缆或接口
-4. 使用`./restart_adb.sh`重启ADB服务
+4. 使用`./scripts/restart_adb.sh`重启ADB服务
 
 ### ADB Keyboard问题
 1. 确保已安装ADB Keyboard
@@ -111,14 +111,14 @@ result = agent.run("打开美团搜索附近的火锅店")
 
 ### 使用 run_autoglm.py 脚本
 
-该项目包含一个预配置的脚本 [run_autoglm.py](file:///Users/chenlijun/dev/Open-AutoGLM/run_autoglm.py)，它默认使用智谱 BigModel 平台：
+该项目包含一个预配置的脚本 `scripts/run_autoglm.py`，它默认使用智谱 BigModel 平台：
 
 ```bash
 # 设置环境变量
 export ZHIPU_API_KEY=your-zhipu-api-key
 
 # 运行脚本
-python run_autoglm.py
+python scripts/run_autoglm.py
 ```
 
 ## 7. 开发和调试

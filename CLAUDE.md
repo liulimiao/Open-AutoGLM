@@ -26,13 +26,13 @@ The agent operates in a loop:
 
 ```bash
 # Initialize virtual environment (creates .venv with Python 3.10+)
-bash init_venv.sh
+bash scripts/init_venv.sh
 
 # Activate the virtual environment
 source .venv/bin/activate
 ```
 
-The `init_venv.sh` script automatically:
+The `scripts/init_venv.sh` script automatically:
 - Finds Python 3.10+ (checks python3.12, python3.11, python3.10, python3)
 - Creates `.venv` virtual environment
 - Installs project in development mode via `pip install -e .`
@@ -42,13 +42,13 @@ The `init_venv.sh` script automatically:
 **Android devices (ADB):**
 ```bash
 # Check ADB connection
-./check_adb_connection.sh
+./scripts/check_adb_connection.sh
 
 # Restart ADB service if needed
-./restart_adb.sh
+./scripts/restart_adb.sh
 
 # Install ADB Keyboard for text input
-./install_adb_keyboard.sh
+./scripts/install_adb_keyboard.sh
 ```
 
 **HarmonyOS devices (HDC):** Similar setup, using `hdc` instead of `adb`
@@ -63,7 +63,7 @@ The `init_venv.sh` script automatically:
 export ZHIPU_API_KEY=your-api-key
 
 # Run interactive script (supports multiline input)
-python run_autoglm.py
+python scripts/run_autoglm.py
 ```
 
 **Single task execution:**
@@ -198,9 +198,9 @@ Model downloads:
 
 ## Utility Scripts
 
-- `init_venv.sh` - Initialize .venv virtual environment
-- `check_adb_connection.sh` - Verify ADB device connection
-- `restart_adb.sh` - Restart ADB service
-- `install_adb_keyboard.sh` - Install ADB Keyboard for text input
-- `run_zhipu.sh` - Quick run using Zhipu BigModel API
-- `run_autoglm.py` - Interactive mode with multiline input support
+- `scripts/init_venv.sh` - Initialize .venv virtual environment
+- `scripts/check_adb_connection.sh` - Verify ADB device connection
+- `scripts/restart_adb.sh` - Restart ADB service
+- `scripts/install_adb_keyboard.sh` - Install ADB Keyboard for text input
+- `scripts/run_zhipu.sh` - Quick run using Zhipu BigModel API
+- `scripts/run_autoglm.py` - Interactive mode with multiline input support
