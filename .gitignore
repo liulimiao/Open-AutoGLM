@@ -25,6 +25,8 @@ venv/
 ENV/
 env/
 .venv/
+.env
+
 
 # IDE
 .idea/
@@ -59,5 +61,4 @@ screenshots/
 call_model.py
 app_package_name.py
 
-.claude/
 .venv

@@ -1,0 +1,202 @@
+# 查看投资账本app的单个账本的基金持仓
+
+## 功能描述
+
+通过PhoneAgent控制手机，自动收集投资账本app中已打开的账本的基金持仓信息，包括：
+- 基金名称
+- 基金代码
+- 市值
+- 仓位百分比
+- 持有盈亏金额
+
+## 核心要点
+
+### 1. Temperature参数说明
+`temperature=0.1` 是AI模型的温度参数，控制输出的随机性：
+- **低温度（0.1-0.3）**：输出更确定、一致，适合数据收集等需要准确性的任务
+- **高温度（0.7-1.0）**：输出更随机、多样，适合创意生成任务
+- 本场景使用0.1确保数据收集的稳定性和准确性
+
+### 2. 任务描述原则
+**重要**：只告诉AI需求，不要告诉具体操作动作
+
+✅ **推荐**：
+```
+请完整查看当前账本中所有基金的持仓信息。信息可能需要滚动屏幕才能看完。请告诉我所有基金的完整信息，包括：基金名称、代码、市值、仓位百分比、持有盈亏金额。
+```
+
+❌ **避免**：
+```
+请向下滚动一屏，然后读取基金信息...  # 不要指定具体动作
+请点击屏幕顶部...                  # 不要告诉具体操作
+```
+
+### 3. 数据来源
+AI分析屏幕内容时，关键信息会出现在结构化的JSON输出中：
+```json
+{
+  "step": 1,
+  "thinking": "AI看到的屏幕内容的文字描述...",
+  "action": {...}
+}
+```
+
+`thinking`字段包含：
+- AI看到的屏幕内容的文字描述
+- 识别出的基金名称、代码、数值等
+- 每个字段的含义和数值
+
+### 4. 上下文管理
+可以通过修改`PhoneAgent`的`_context`提供额外上下文：
+```python
+agent._context.append({
+    "role": "user",
+    "content": "当前在投资账本app的某个账本详情页，需要收集所有基金持仓信息"
+})
+```
+
+### 5. 数据去重
+由于屏幕滚动时可能有重叠，需要对返回数据去重：
+- **去重键**：基金代码（6位数字）
+- **去重范围**：单个账本内（不需要跨账本去重）
+- **策略**：保留第一次出现的记录
+
+## 使用方法
+
+```bash
+.venv/bin/python -c "
+import os
+from phone_agent.agent_for_coding_agent import PhoneAgent
+from phone_agent.agent import AgentConfig
+from phone_agent.model import ModelConfig
+
+# 从.env文件加载API密钥
+os.environ['ZHIPU_API_KEY'] = '你的API密钥'
+
+# 配置模型（temperature=0.1确保输出稳定）
+model_config = ModelConfig(
+    base_url='https://open.bigmodel.cn/api/paas/v4',
+    api_key=os.environ['ZHIPU_API_KEY'],
+    model_name='autoglm-phone',
+    temperature=0.1,
+)
+
+agent_config = AgentConfig(max_steps=15, verbose=True, lang='cn')
+agent = PhoneAgent(model_config=model_config, agent_config=agent_config)
+
+# 执行数据收集 - 只告诉需求，不指定操作
+result = agent.run('请完整查看当前账本中所有基金的持仓信息。信息可能需要滚动屏幕才能看完。请告诉我所有基金的完整信息，包括：基金名称、代码、市值、仓位百分比、持有盈亏金额。')
+print(f'收集结果: {result}')
+"
+```
+
+## 前置条件
+
+1. ✅ 手机已通过ADB连接并调试
+2. ✅ 投资账本app已打开到**单个账本的持仓列表页**（不是基金tab）
+3. ✅ .env文件中已设置ZHIPU_API_KEY（可用 `grep ZHIPU_API_KEY .env` 检查）
+4. ✅ 项目根目录存在.venv虚拟环境目录
+
+## 数据提取与去重
+
+### 从JSON输出提取数据
+AI的输出结构：
+```json
+{
+  "step": 1,
+  "thinking": "我看到以下基金信息：\n1. 广发创业板ETF联接A (003765)\n   - 市值：18,930.42\n   - 仓位：8.97%\n   - 持有盈亏：+6,903.44\n...",
+  "action": {
+    "_metadata": "do",
+    "action": "Tap",
+    "element": [499, 544]
+  }
+}
+```
+
+当任务完成时：
+```json
+{
+  "step": 5,
+  "thinking": "我已经完整查看了所有基金信息...",
+  "action": {
+    "_metadata": "finish",
+    "message": "任务完成，共12只基金..."
+  },
+  "finished": true,
+  "message": "任务完成，共12只基金..."
+}
+```
+
+### 去重实现示例
+```python
+# 按基金代码去重
+seen_codes = set()
+unique_funds = []
+
+for fund in all_funds:
+    code = fund.get('code')
+    if code and code not in seen_codes:
+        seen_codes.add(code)
+        unique_funds.append(fund)
+```
+
+## 示例输出格式（YAML）
+
+```yaml
+账本:
+  名称: "长赢S计划"
+  账户资产: 211040.26
+  基金数量: 12
+
+基金列表:
+  - 序号: 1
+    名称: "华宝中证医疗ETF联接C"
+    代码: "012323"
+    市值: 37659.88
+    仓位: "8.65%"
+    持有盈亏: -2337.99
+
+  - 序号: 2
+    名称: "广发创业板ETF联接A"
+    代码: "003765"
+    市值: 18930.42
+    仓位: "8.97%"
+    持有盈亏: 6903.44
+
+  - 序号: 3
+    名称: "广发中证环保ETF联接A"
+    代码: "001064"
+    市值: 14063.55
+    仓位: "6.66%"
+    持有盈亏: 4063.93
+
+  - 序号: 4
+    名称: "汇添富文体娱乐主题混合A"
+    代码: "004424"
+    市值: 13451.61
+    仓位: "6.37%"
+    持有盈亏: 3451.69
+
+  # ... 更多基金
+```
+
+## 常见问题
+
+### Q: AI返回的数据有重复怎么办？
+A: 屏幕滚动时内容重叠是正常的，按基金代码去重即可。
+
+### Q: 如何判断已经收集完所有数据？
+A: 当输出中包含`"finished": true`时，表示任务完成。
+
+### Q: 数据不完整怎么办？
+A: 重新执行一次，确保任务描述中包含"信息可能需要滚动屏幕才能看完"的提示。
+
+### Q: temperature参数可以调整吗？
+A: 数据收集建议保持0.1，如果需要AI更有创意地理解界面，可以适当调高到0.2-0.3。
+
+## 适用场景
+
+- 查看投资账本app的基金持仓明细
+- 收集多个账本的基金数据
+- 统计和分析基金投资情况
+- 导出基金持仓数据用于分析
